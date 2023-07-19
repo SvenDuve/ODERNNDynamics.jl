@@ -1,0 +1,13 @@
+name = "ODERNNDynamics"
+uuid = "8bc7aede-b6b4-4d91-81c5-ce89a4bda3d5"
+authors = ["Sven Duve <svenduve@gmail.com> and contributors"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
