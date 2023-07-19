@@ -15,17 +15,7 @@ using RLTypes
 using OneHotArrays
 
 
-export modelEnv, setReward, ODE_RNN, CombinedModel, train_step!, accuracy
-
-
-
-function setReward(state_size, action_size)
-
-    return Chain(Dense(state_size + action_size + state_size, 64, tanh),
-                    Dense(64, 64, tanh),
-                    Dense(64, 1))
-                    
-end
+export modelEnv, ODE_RNN, CombinedModel, train_step!, accuracy
 
 
 # struct
@@ -40,6 +30,11 @@ Flux.@functor ODE_RNN
 
 #outer constructor
 
+"""
+    ODE_RNN(input_size::Int, hidden_size::Int)
+
+Constructs an ODE_RNN model with the given input and hidden size.
+"""
 function ODE_RNN(input_size::Int, hidden_size::Int)
     cell = Flux.RNNCell(input_size, hidden_size)
     f_theta = Chain(Dense(hidden_size, 32, tanh), Dense(32, hidden_size))#, Dense(100,hidden_size, tanh))
@@ -47,7 +42,11 @@ function ODE_RNN(input_size::Int, hidden_size::Int)
 end
 
 
+"""
+    (m::ODE_RNN)(timestamps, datapoints, hidden)
 
+Returns the hidden state of the ODE_RNN model at the given timestamps and datapoints.
+"""
 function (m::ODE_RNN)(timestamps, datapoints, hidden)
 
     h = Zygote.Buffer(hidden)
@@ -96,14 +95,22 @@ end
 
 
 
+"""
+    accuracy(y_true, y_pred, tolerance)
 
+Returns the accuracy of the prediction y_pred compared to the true value y_true.
+"""
 function accuracy(y_true, y_pred, tolerance)
     correct = sum(abs.(y_true .- y_pred) .<= tolerance)
     return correct / length(y_true)
 end
 
 
+"""
+    train_step!(environment::ContinuousEnvironment, S, A, R, S´, T, hidden, timestamps, fθ, model_opt)
 
+Performs a training step on the given continuous action model with gradient descent.
+"""
 function train_step!(environment::ContinuousEnvironment, S, A, R, S´, T, hidden, timestamps, fθ, model_opt)
 # function train_step!(S, A, R, S´, T, hidden, timestamps, fθ, Rϕ, model_opt, reward_opt)
 
@@ -115,15 +122,15 @@ function train_step!(environment::ContinuousEnvironment, S, A, R, S´, T, hidden
     dθ = Flux.gradient(m -> Flux.Losses.mse(m(timestamps, X, hidden), S´), fθ)
     Flux.update!(model_opt, fθ, dθ[1])
     
-    # dϕ = Flux.gradient(m -> Flux.Losses.mse(m(vcat(S, A, S´)), hcat(R...)), Rϕ)
-    # Flux.update!(reward_opt, Rϕ, dϕ[1])
-
 
 end
 
-function train_step!(environment::DiscreteEnvironment, S, A, R, S´, T, hidden, timestamps, fθ, model_opt, ep::EnvParameter)
-# function train_step!(S, A, R, S´, T, hidden, timestamps, fθ, Rϕ, model_opt, reward_opt)
+"""
+    train_step!(environment::DiscreteEnvironment, S, A, R, S´, T, hidden, timestamps, fθ, model_opt, ep::EnvParameter)
 
+Performs a training step on the given discrete action model with gradient descent.
+"""
+function train_step!(environment::DiscreteEnvironment, S, A, R, S´, T, hidden, timestamps, fθ, model_opt, ep::EnvParameter)
 
     sum(T[1:(end-1)]) > 0 && return
     X = vcat(S, onehotbatch(vcat(A...), ep.labels))
@@ -132,14 +139,15 @@ function train_step!(environment::DiscreteEnvironment, S, A, R, S´, T, hidden, 
     dθ = Flux.gradient(m -> Flux.Losses.mse(m(timestamps, X, hidden), S´), fθ)
     Flux.update!(model_opt, fθ, dθ[1])
     
-    # dϕ = Flux.gradient(m -> Flux.Losses.mse(m(vcat(S, A, S´)), hcat(R...)), Rϕ)
-    # Flux.update!(reward_opt, Rϕ, dϕ[1])
-
 
 end
 
 
+"""
+    modelEnv(environment::ContinuousEnvironment, modelParams::ModelParameter)
 
+Main algorithm to train a continuous action model.
+"""
 function modelEnv(environment::ContinuousEnvironment, modelParams::ModelParameter)
 
     gym = pyimport("gymnasium")
@@ -276,7 +284,11 @@ function modelEnv(environment::ContinuousEnvironment, modelParams::ModelParamete
 end
 
 
-# discrete
+"""
+    modelEnv(environment::DiscreteEnvironment, modelParams::ModelParameter)
+
+Main algorithm to train a discrete action model.
+"""
 function modelEnv(environment::DiscreteEnvironment, modelParams::ModelParameter)
 
     gym = pyimport("gymnasium")
