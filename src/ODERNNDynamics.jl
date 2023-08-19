@@ -253,6 +253,7 @@ function modelEnv(environment::ContinuousEnvironment, modelParams::ModelParamete
 
         if j % modelParams.store_frequency == 0
             
+            # Debugging output
             # S, A, R, S´, T = sample(test_buffer, ModelMethod(), modelParams.trajectory)
             # sum(T[1:(end-1)]) > 0 && continue
             # X = vcat(S, A)
@@ -395,6 +396,7 @@ function modelEnv(environment::DiscreteEnvironment, modelParams::ModelParameter)
 
         if j % modelParams.store_frequency == 0
             
+            # Debugging output
             # S, A, R, S´, T = sample(test_buffer, ModelMethod(), modelParams.trajectory)
             # sum(T[1:(end-1)]) > 0 && continue
             # X = vcat(S, A)
@@ -427,10 +429,3 @@ end
 
 
 end # module ODERNNDynamics
-
-
-# mE = modelEnv(Acrobot(), ModelParameter(collect_train=100, collect_test=10, training_episodes=50, batch_size=512))
-
-# mE = modelEnv("Pendulum-v1", ModelParameter(collect_train=100, collect_test=10, training_episodes=140, batch_size=512, hidden=10, model_η=0.0005))
-# mE = modelEnv("Pendulum-v1", ModelParameter(collect_train=100, collect_test=10, training_episodes=140, batch_size=512, hidden=10, model_η=0.0005))
-# mE = modelEnv("LunarLander-v2", ModelParameter(collect_train=100, collect_test=4, training_episodes=50, batch_size=512, hidden=10, model_η=0.0005))
