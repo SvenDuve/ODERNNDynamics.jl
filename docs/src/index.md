@@ -44,6 +44,10 @@ Then again within julia,
 ```julia
 using Conda
 using PyCall
+Conda.pip_interop(true)
+Conda.add("wheel")
+Conda.add("box2d-py")
+Conda.add("pygame")
 Conda.pip("install", "git+https://github.com/SvenDuve/Gymnasium")
 ```
 
